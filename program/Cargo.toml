@@ -1,0 +1,34 @@
+[package]
+name        = "sacredvote-pq-bench-program"
+version     = "0.1.0"
+edition     = "2021"
+license     = "Apache-2.0"
+description = "SP1 RISC-V program: stub TLS-1.3 handshake + ML-KEM-768 decap + ML-DSA verify"
+
+# Pin SP1 zkvm against whatever the host SP1 toolchain is. Update with
+# `sp1up` to bump the toolchain, then bump this dep to match.
+[dependencies]
+sp1-zkvm = "5.2"
+
+# Pure-Rust, no_std-capable crypto. These are the RustCrypto crates that
+# work inside the SP1 zkVM. Versions chosen to match the SP1 patch list
+# (see SP1's `sp1-derive` and `patches.toml` for what's accelerated by
+# precompile). When SP1 has a precompile for the operation, performance
+# improves dramatically; absent a precompile, it falls through to the
+# pure-Rust impl, which is what we want to measure honestly.
+ml-kem  = { version = "0.2", default-features = false }
+ml-dsa  = { version = "0.0.4", default-features = false }
+sha2    = { version = "0.10", default-features = false }
+hkdf    = { version = "0.12", default-features = false }
+aes-gcm = { version = "0.10", default-features = false, features = ["aes"] }
+
+# Deterministic test vectors; we don't pull a true RNG inside the
+# zkVM since the inputs are committed by the host.
+hex = { version = "0.4", default-features = false, features = ["alloc"] }
+
+[profile.release]
+opt-level = 3
+lto       = "fat"
+codegen-units = 1
+debug = false
+panic = "abort"

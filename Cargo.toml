@@ -1,0 +1,33 @@
+# sacredvote-pq-bench
+#
+# Workspace for the SP1-STARK-only prover-time measurement that the v6
+# whitepaper review (2026-05-01) flagged as the highest-information-density
+# experiment in the cryptographic critical path.
+#
+# Two members:
+#
+#   program/   The SP1 zkVM RISC-V program. Performs stub TLS-1.3-shaped
+#              ops + ML-KEM-768 decap + ML-DSA verify. Built with the
+#              `succinct` Rust toolchain, NOT the host toolchain.
+#   script/    Host-side prover/runner using sp1-sdk. Loads the program
+#              ELF, runs prove() in STARK-only mode, prints cycle counts
+#              + wall-clock time.
+#
+# Crucially: program/ is excluded from the host workspace because it
+# targets `riscv32im-succinct-zkvm-elf`, has different feature flags,
+# and pulls in sp1-zkvm patches that conflict with host builds. We
+# follow the SP1 examples convention — program/ is a sibling crate
+# that the script invokes via `cargo prove build` (handled by sp1-sdk
+# at runtime), not a workspace member.
+
+[workspace]
+resolver = "2"
+members = ["script"]
+exclude = ["program"]
+
+[workspace.package]
+version     = "0.1.0"
+edition     = "2021"
+license     = "Apache-2.0"
+repository  = "https://github.com/thepictishbeast/sacredvote-pq-bench"
+description = "SP1-STARK-only prover-time measurement for the Sacred.Vote PQ verifier circuit"
