@@ -24,7 +24,7 @@ sp1-sdk = "5.2"
 # verifying values that actually validate. We could ship pre-computed
 # hex fixtures, but minting fresh ones every run guards against bit-rot.
 ml-kem  = "0.2"
-ml-dsa  = "0.0.4"
+ml-dsa  = "0.1.0"
 sha2    = "0.10"
 hkdf    = "0.12"
 aes-gcm = "0.10"
