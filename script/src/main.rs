@@ -33,6 +33,14 @@ use sp1_sdk::{include_elf, ProverClient, SP1Stdin};
 /// compile time relative to this script crate's manifest.
 pub const PROGRAM_ELF: &[u8] = include_elf!("sacredvote-pq-bench-program");
 
+/// The SP1 SDK version this bench is linked against. Pulled from the
+/// `sp1-sdk` Cargo dep version so the `RunReport.sp1_sdk_version` field
+/// reflects the actual prover toolchain, not the bench crate version
+/// (which would be `env!("CARGO_PKG_VERSION")`). Kept as a const so the
+/// constant-folded value is what lands in the JSON without an env
+/// lookup at runtime. Update this when bumping the sp1-sdk dep.
+const SP1_SDK_VERSION: &str = "5.2.4";
+
 #[derive(Parser, Debug)]
 #[command(version, about = "SP1-STARK-only PQ-bench harness", long_about = None)]
 struct Args {
@@ -143,7 +151,7 @@ fn main() -> Result<()> {
             runs: 1,
             cycles,
             elf_bytes: PROGRAM_ELF.len(),
-            sp1_sdk_version: env!("CARGO_PKG_VERSION").into(),
+            sp1_sdk_version: SP1_SDK_VERSION.into(),
             notes: "execute-only: no prove() run, no STARK proof produced",
             ..Default::default()
         };
