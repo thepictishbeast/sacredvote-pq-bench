@@ -1,0 +1,6 @@
+# Wrap succinct's rustc to filter out unsupported flags that modern
+# host cargo emits unconditionally. See sp1-rustc-wrapper.sh for the
+# full rationale. RUSTC_WRAPPER is invoked AS rustc with the real
+# rustc binary as its first argument, then all the rustc flags.
+[build]
+rustc-wrapper = ".cargo/sp1-rustc-wrapper.sh"

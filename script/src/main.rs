@@ -23,8 +23,8 @@ use std::time::Instant;
 
 use anyhow::{Context, Result};
 use clap::Parser;
-use ml_dsa::{signature::Signer, MlDsa65, KeyGen, KeyPair};
-use ml_kem::{kem::Encapsulate, KemCore, MlKem768};
+use ml_dsa::{signature::Signer, KeyGen, KeyPair, MlDsa65};
+use ml_kem::{kem::Encapsulate, EncodedSizeUser, KemCore, MlKem768};
 use rand::rngs::OsRng;
 use serde::Serialize;
 use sp1_sdk::{include_elf, ProverClient, SP1Stdin};
@@ -101,7 +101,7 @@ fn mint_fixtures() -> Result<StubInputs> {
     Ok(StubInputs {
         hybrid_shared_secret: hybrid,
         transcript_hash,
-        ml_kem_ciphertext: ct.as_bytes().to_vec(),
+        ml_kem_ciphertext: ct.as_slice().to_vec(),
         ml_kem_decap_key: dk.as_bytes().to_vec(),
         ml_dsa_msg: msg,
         ml_dsa_sig: sig.encode().to_vec(),
@@ -136,10 +136,7 @@ fn main() -> Result<()> {
         .context("sp1 execute")?;
     let exec_seconds = exec_start.elapsed().as_secs_f64();
     let cycles = exec_report.total_instruction_count();
-    eprintln!(
-        "execute: {} cycles in {:.3}s",
-        cycles, exec_seconds
-    );
+    eprintln!("execute: {} cycles in {:.3}s", cycles, exec_seconds);
 
     if args.execute_only {
         let report = RunReport {

@@ -6,9 +6,17 @@ license     = "Apache-2.0"
 description = "SP1 RISC-V program: stub TLS-1.3 handshake + ML-KEM-768 decap + ML-DSA verify"
 
 # Pin SP1 zkvm against whatever the host SP1 toolchain is. Update with
-# `sp1up` to bump the toolchain, then bump this dep to match.
+# `sp1up` to bump the toolchain, then bump this dep to match. The
+# `succinct` rustup toolchain symlink at ~/.rustup/toolchains/succinct
+# selects which sp1-zkvm version this resolves against.
 [dependencies]
 sp1-zkvm = "5.2"
+
+# Explicit serde — serde 1.0.228+ split out serde_core; pinning here
+# with default-features=false + derive feature keeps the
+# `#[derive(serde::Deserialize)]` on StubInputs resolving cleanly
+# against sp1_zkvm::io::read's DeserializeOwned bound.
+serde   = { version = "1", default-features = false, features = ["derive"] }
 
 # Pure-Rust, no_std-capable crypto. These are the RustCrypto crates that
 # work inside the SP1 zkVM. Versions chosen to match the SP1 patch list
@@ -20,7 +28,7 @@ ml-kem  = { version = "0.2", default-features = false }
 ml-dsa  = { version = "0.0.4", default-features = false }
 sha2    = { version = "0.10", default-features = false }
 hkdf    = { version = "0.12", default-features = false }
-aes-gcm = { version = "0.10", default-features = false, features = ["aes"] }
+aes-gcm = { version = "0.10", default-features = false, features = ["aes", "alloc"] }
 
 # Deterministic test vectors; we don't pull a true RNG inside the
 # zkVM since the inputs are committed by the host.

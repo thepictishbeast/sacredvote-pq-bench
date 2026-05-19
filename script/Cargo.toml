@@ -9,6 +9,12 @@ description = "Host-side prover for the SP1 PQ-bench stub program"
 name = "bench"
 path = "src/main.rs"
 
+[build-dependencies]
+# build.rs invokes `sp1_build::build_program("../program")` so the
+# `include_elf!()` macro in src/main.rs resolves the
+# `SP1_ELF_sacredvote-pq-bench-program` env var at compile time.
+sp1-build = "5.2"
+
 [dependencies]
 sp1-sdk = "5.2"
 

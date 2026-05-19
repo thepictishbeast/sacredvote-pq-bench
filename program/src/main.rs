@@ -160,14 +160,17 @@ pub fn main() {
 /// SP1 ships a Kyber/ML-KEM precompile in a future version, this will be
 /// patched transparently via SP1's patch system — the API stays the same.
 fn ml_kem_decap_768(decap_key_bytes: &[u8], ciphertext_bytes: &[u8]) -> [u8; 32] {
-    use ml_kem::{kem::Decapsulate, Encoded, KemCore, MlKem768};
-    let dk_arr: &Encoded<<MlKem768 as KemCore>::DecapsulationKey> =
+    // 0.2.x API: `KemCore` exposes `DecapsulationKey` associated type
+    // but not `Ciphertext` (the latter is `ml_kem::Ciphertext<K>` —
+    // an alias over `Array<u8, K::CiphertextSize>`). `EncodedSizeUser`
+    // must be in scope for `from_bytes()` on both encoded types.
+    use ml_kem::{kem::Decapsulate, Ciphertext, EncodedSizeUser, KemCore, MlKem768};
+    let dk_arr: &ml_kem::Encoded<<MlKem768 as KemCore>::DecapsulationKey> =
         decap_key_bytes.try_into().expect("ml-kem decap key length");
-    let ct_arr: &Encoded<<MlKem768 as KemCore>::Ciphertext> =
+    let ct_arr: &Ciphertext<MlKem768> =
         ciphertext_bytes.try_into().expect("ml-kem ciphertext length");
     let dk = <MlKem768 as KemCore>::DecapsulationKey::from_bytes(dk_arr);
-    let ct = <MlKem768 as KemCore>::Ciphertext::from_bytes(ct_arr);
-    let shared = dk.decapsulate(&ct).expect("ml-kem decap");
+    let shared = dk.decapsulate(ct_arr).expect("ml-kem decap");
     shared.into()
 }
 
@@ -175,12 +178,15 @@ fn ml_kem_decap_768(decap_key_bytes: &[u8], ciphertext_bytes: &[u8]) -> [u8; 32]
 /// Returns the boolean verify result (true = signature valid).
 fn ml_dsa_verify_65(verifying_key_bytes: &[u8], msg: &[u8], sig_bytes: &[u8]) -> bool {
     use ml_dsa::{signature::Verifier, MlDsa65, VerifyingKey, Signature};
+    // ml-dsa 0.0.4 `decode` takes `&Array<u8, …Size>` rather than
+    // `&[u8; N]`. `.into()` coerces the byte-array reference because
+    // `Array` impls `From<&[u8; N]>` for the matching fixed size.
     let vk_arr: &[u8; 1952] = verifying_key_bytes
         .try_into()
         .expect("ml-dsa-65 vk length");
     let sig_arr: &[u8; 3309] = sig_bytes.try_into().expect("ml-dsa-65 sig length");
-    let vk = <VerifyingKey<MlDsa65>>::decode(vk_arr);
-    let sig = match <Signature<MlDsa65>>::decode(sig_arr) {
+    let vk = <VerifyingKey<MlDsa65>>::decode(vk_arr.into());
+    let sig = match <Signature<MlDsa65>>::decode(sig_arr.into()) {
         Some(s) => s,
         None => return false,
     };

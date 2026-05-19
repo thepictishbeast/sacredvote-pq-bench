@@ -106,11 +106,21 @@ This bench is the input to that decision. Rerun whenever:
 
 ## Status
 
-Scaffold is complete; it has not yet been measured. Measurement requires
-running on a commodity laptop with the SP1 toolchain installed —
-deliberately *not* on the production VPS, because the VPS hardware
-profile is irrelevant to the voter-UX question. Tim's machine or any dev
-laptop is the right host.
+Scaffold is complete; first measurement target is the **production VPS**
+(per the no-external-spend constraint — see
+`~/.claude/projects/-/memory/feedback_no_external_spend.md`). Commodity-
+laptop measurement is deferred to a future release when laptop hardware
+becomes available for direct measurement.
+
+The VPS measurement is a **conservative bound** for the laptop number,
+not a substitute for it: the VPS is closer to a server-class host than a
+voter laptop, so the VPS prove time is a *floor* — voter laptops will
+take strictly longer (estimated 10-50× slower based on VPS-to-laptop CPU
+scaling). The decision rule below is keyed off the laptop p95, but the
+VPS p95 lets us pre-judge the architecture decision: if the VPS proves
+in 5+ minutes, voter-laptop proving is dead regardless and we commit to
+delegated proving (G5) immediately.
 
 When numbers land, append a row to [`RESULTS.md`](RESULTS.md) with
-hardware, SP1 version, crate versions, and the JSON.
+hardware (VPS specs), SP1 version, crate versions, and the JSON. Mark
+the row as `host=vps` so we don't conflate it with future laptop rows.
