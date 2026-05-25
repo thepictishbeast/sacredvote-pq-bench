@@ -25,7 +25,7 @@ serde   = { version = "1", default-features = false, features = ["derive"] }
 # improves dramatically; absent a precompile, it falls through to the
 # pure-Rust impl, which is what we want to measure honestly.
 ml-kem  = { version = "0.2", default-features = false }
-ml-dsa  = { version = "0.0.4", default-features = false }
+ml-dsa  = { version = "0.1.0", default-features = false }
 sha2    = { version = "0.10", default-features = false }
 hkdf    = { version = "0.12", default-features = false }
 aes-gcm = { version = "0.10", default-features = false, features = ["aes", "alloc"] }
